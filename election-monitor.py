@@ -25,6 +25,16 @@ url = "http://example.com"
 
 # Ask where to store it
 
+
+# Set the retrieval frequency (in minutes)
+frequency = 5.0
+
+
+# Add a "Stop" button
+
+
+# Add a "Stop after x times" feature or at specific time of day
+
     
 # Get the web page
 html = requests.get(url).text
@@ -35,7 +45,7 @@ print (html)
 # Add timestamp to file name
 
 
-
+# Repeat the retrieval according to the frequency set
 
 
 
