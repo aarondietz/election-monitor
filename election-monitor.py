@@ -5,7 +5,70 @@ Created on Sat Sep 15 17:19:10 2018
 
 """
 
+# Import libraries
+import requests
+from bs4 import BeautifulSoup
 
+
+# Add functionality for dialog box GUI
+
+
+# Add functionality for building into an executable that can be 
+# run by any ol' person
+
+
+# Add functionality for getting more than one page
+
+
+# Ask what web page to get
+url = "http://example.com"
+
+# Ask where to store it
+
+    
+# Get the web page
+html = requests.get(url).text
+print (html)
+
+
+# Store the web site
+# Add timestamp to file name
+
+
+
+
+
+
+
+
+
+#### IDEAS - PROBABLY BAD ONES
+"""
+import wget
+from bs4 import BeautifulSoup
+url = "https://www.facebook.com/hellomeets/events"
+
+down = wget.download(url)
+
+f = open(down, 'r')
+htmlText = "\n".join(f.readlines())
+f.close()
+print htmlText
+
+
+
+
+
+
+This is an example using pythons built in urllib2:
+
+import urllib2
+from bs4 import BeautifulSoup
+url = "https://www.facebook.com/hellomeets/events"
+
+html = urllib2.urlopen(url).read()
+print html
+"""
 
 
 
@@ -47,57 +110,6 @@ scheduler.start()
 # To shut it down:
 # scheduler.shutdown()
 """
-
-
-
-# original code snippet from: https://stackoverflow.com/questions/3533528/python-web-crawlers-and-getting-html-source-code 
-import urllib2
-
-response = urllib2.urlopen("http://aarondietz.us")
-page_source = response.read()
-
-# This person recommends using Beautiful Soup for parsing the input
-
-
-
-
-More stuff to try:
-    
-    
-    import requests
-from bs4 import BeautifulSoup
-url = "https://www.facebook.com/hellomeets/events"
-
-html = requests.get(url).text
-print html
-
-This is an example using pythons built in urllib2:
-
-import urllib2
-from bs4 import BeautifulSoup
-url = "https://www.facebook.com/hellomeets/events"
-
-html = urllib2.urlopen(url).read()
-print html
-
-
-
-
-
-import wget
-from bs4 import BeautifulSoup
-url = "https://www.facebook.com/hellomeets/events"
-
-down = wget.download(url)
-
-f = open(down, 'r')
-htmlText = "\n".join(f.readlines())
-f.close()
-print htmlText
-
-
-
-
 
 
 
