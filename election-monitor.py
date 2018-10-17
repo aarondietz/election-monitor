@@ -10,6 +10,7 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 from pytz import timezone
+import os.path
 
 # Add functionality for dialog box GUI
 
@@ -24,7 +25,9 @@ from pytz import timezone
 # Ask what web page to get
 url = "http://example.com"
 
-# Ask where to store it
+# Ask where to store the file/s
+# Directory must already exist
+save_here = 'C:/monitor/'
 
 
 # Set the retrieval frequency (in minutes)
@@ -47,22 +50,47 @@ print (html)
 # in case later we want to stitch data from many users together in time
 # Code grabbed from https://stackoverflow.com/questions/34549663/how-to-set-timezone-to-eastern-for-datetime-module-in-python
 # define date format, example: 2015-12-31 19:21:00 EST-0500
-fmt = '%Y-%m-%d %H:%M:%S %Z%z'
+fmt = '%Y%m%d%H%M%S%Z%z'
 # define eastern timezone
 eastern = timezone('US/Eastern')
 # localized datetime
 loc_dt = datetime.now(eastern)
-
-print(loc_dt.strftime(fmt))
+# print(loc_dt.strftime(fmt))
 
 
 
 # Store the web site
-# Add timestamp to file name
+# Got some of this code from: https://stackoverflow.com/questions/8024248/telling-python-to-save-a-txt-file-to-a-certain-directory-on-windows-and-mac
+
+# Establish the file name
+file_name = "test" + "-" + loc_dt.strftime(fmt)
+# Get unique page title from url to use as folder name to group all the retrieved copies
+# in a single directory
+
+# Prepend the path
+completePath = os.path.join(save_here, file_name + ".html")         
+# Open a file object for writing
+file_obj = open(completePath, "w")
+# Write the retrieved web page to the file object
+toFile = html
+file_obj.write(toFile)
+# Close the file object
+file_obj.close()
+
 
 
 # Repeat the retrieval according to the frequency set
 
+
+
+
+
+
+
+# To do:
+#
+# Add functionality for capturing various different URL suffixes (html, pdf, etc.) and saving as such.
+# Add functionality for each page to be saved in its own folder
 
 
 
