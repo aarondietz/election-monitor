@@ -8,7 +8,8 @@ Created on Sat Sep 15 17:19:10 2018
 # Import libraries
 import requests
 from bs4 import BeautifulSoup
-
+from datetime import datetime
+from pytz import timezone
 
 # Add functionality for dialog box GUI
 
@@ -39,6 +40,21 @@ frequency = 5.0
 # Get the web page
 html = requests.get(url).text
 print (html)
+
+
+
+# Get timestamp - all timestamps will be Eastern time for consistency,
+# in case later we want to stitch data from many users together in time
+# Code grabbed from https://stackoverflow.com/questions/34549663/how-to-set-timezone-to-eastern-for-datetime-module-in-python
+# define date format, example: 2015-12-31 19:21:00 EST-0500
+fmt = '%Y-%m-%d %H:%M:%S %Z%z'
+# define eastern timezone
+eastern = timezone('US/Eastern')
+# localized datetime
+loc_dt = datetime.now(eastern)
+
+print(loc_dt.strftime(fmt))
+
 
 
 # Store the web site
