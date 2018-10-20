@@ -4,6 +4,8 @@ Created on Sat Sep 15 17:19:10 2018
 
 This is written to help monitor elections.
 
+Written on Python 3.6.4
+
 The idea is to record election result data over time so we can later analyze
 trends to detect inconsistencies that may help us identify tampering, mistakes, 
 or other impacts to an election.
@@ -27,66 +29,82 @@ from datetime import datetime
 from pytz import timezone
 import os.path
 from apscheduler.schedulers.blocking import BlockingScheduler
-
-# Add functionality for dialog box GUI
-
-
-# Add functionality for building into an executable that can be 
-# run by any ol' person
+from apscheduler.schedulers.background import BackgroundScheduler
 
 
-# Add functionality for getting more than one page
 
-
-# Ask what web page to get
+# Set what web page to get
+# Future functionality should ask what page to get
 url = "http://example.com"
 
-# Ask where to store the file/s
+
+# Set where to store the file/s
 # Directory must already exist
 save_here = 'C:/monitor/'
+# Future functionality should ask where to save to
+# Future functionality should also use unique web page title from url stored
+# to use as a folder name to group all the retrieved copies in a single directory
 
 
-# Set the retrieval frequency (in minutes)
+# Set the retrieval frequency (in minutes) / how often 
+# to retrieve a copy of the site
+# Future functionality should ask the frequency
 frequency = 5.0
 
 
-# Add a "Stop" button
+
+# Set how long the program will run for.
+# Run the program this number of times / save this number of copies and then quit
+number_of_copies = 144
 
 
-# Add a "Stop after x times" feature or at specific time of day
+# Initialize variable to keep track of how many times its run/how many copies saved
+copies_saved = 0
+
+
+# Establish what we'll call the saved version of the file
+# Future functionality should just grab the web page title and use that
+# with remediation for duplicates (so if we've already grabbed a page titled 
+# that, it'll add a version number or do some other remediation)
+filename = "election_result"
+
+
+
 
     
 # Get the web page
-html = requests.get(url).text
-print (html)
+def get_web_page(url_string):
+    file_obj = requests.get(url).text
+    #print (file_obj)
+    return file_obj
+    # Future functionality should get the suffix of the retrieved web page (.html, .htm, .cfm, etc.)
+    # and then keep that to append to the end of the saved copy.
 
 
-# Add functionality to get the suffix of the retrieved web page (.html, .htm, .cfm, etc.)
-# and then append that to the end of the saved copy.
+# Function only used when called by create_path()
+def get_time_stamp():
+    # Get timestamp - all timestamps will be Eastern time for consistency,
+    # in case later we want to stitch data from many users together in time
+    # Code grabbed from https://stackoverflow.com/questions/34549663/how-to-set-timezone-to-eastern-for-datetime-module-in-python
+    # define date format, example: 2015-12-31 19:21:00 EST-0500
+    fmt = '%Y%m%d%H%M%S%Z%z'
+    # define eastern timezone
+    eastern = timezone('US/Eastern')
+    # localized datetime
+    loc_dt = datetime.now(eastern)
+    # print(loc_dt.strftime(fmt))
+    return loc_dt.strftime(fmt)
 
 
 
-# Get timestamp - all timestamps will be Eastern time for consistency,
-# in case later we want to stitch data from many users together in time
-# Code grabbed from https://stackoverflow.com/questions/34549663/how-to-set-timezone-to-eastern-for-datetime-module-in-python
-# define date format, example: 2015-12-31 19:21:00 EST-0500
-fmt = '%Y%m%d%H%M%S%Z%z'
-# define eastern timezone
-eastern = timezone('US/Eastern')
-# localized datetime
-loc_dt = datetime.now(eastern)
-# print(loc_dt.strftime(fmt))
+def create_path(filename_string, save_path):
+    # Add the time stamp to the filename
+    #filename_w_time = filename + "-" + loc_dt.strftime(fmt)
+    filename_w_time = filename_string + "-" + get_time_stamp()
+    # Prepend the path
+    return os.path.join(save_path, filename_w_time + ".html")     
 
 
-
-
-# Establish the file name
-file_name = "test" + "-" + loc_dt.strftime(fmt)
-# Prepend the path
-completePath = os.path.join(save_here, file_name + ".html")     
-
-# Get unique page title from url to use as folder name to group all the retrieved copies
-# in a single directory
 
 
 # Function for storing the web site
@@ -104,25 +122,41 @@ def store_copy(page_to_save, path_to_save_to):
 
 # Function where everything we need to repeat goes.
 def repeat_tasks():
-    # Call the function for saving a copy of the web page
-    store_copy(html, completePath)
+    html = get_web_page(url)
+    save_path = create_path(filename, save_here)
+    store_copy(html, save_path)
+    global copies_saved
+    copies_saved += 1
+    # Need a more graceful way to stop the scheduler; this throws an error
+    if copies_saved == number_of_copies:
+        scheduler.shutdown()
 
 
-# Repeat the retrieval according to the frequency set
+# Repeat the retrieval according to the frequency chosen above
 # code snippet originally from: https://stackoverflow.com/questions/22715086/scheduling-python-script-to-run-every-hour-accurately
 # link to documentation: https://apscheduler.readthedocs.io/en/latest/ 
-scheduler = BlockingScheduler()
+scheduler = BlockingScheduler()   
 scheduler.add_job(repeat_tasks, 'interval', minutes = frequency)
 scheduler.start()
 
 
 
 
+### TO DO LIST ###
+# Add functionality for capturing various different URL suffixes/page types (html, pdf, etc.) and saving as such.
 
-# To do list that might not be tracked anywhere else:
-#
-# Add functionality for capturing various different URL suffixes (html, pdf, etc.) and saving as such.
+# Add functionality for dialog box GUI (goal is to make it easy for non-coders to use)
+
+# Add functionality for building into an executable that can be run by non-coders
+
+# Add functionality for getting more than one page
 # Add functionality for each page to be saved in its own folder (for when it can handle more than one page)
+
+# Add a "Stop" button
+# Add a "Stop" time
+# Add a "Stop after x times" feature
+# Make the "Stop" time and "Stop after x times" options modifiable while the program is running.
+
 
 
 
@@ -168,11 +202,6 @@ scheduler.start()
 # To shut it down:
 # scheduler.shutdown()
 """
-
-
-
-
-
 
 
 
