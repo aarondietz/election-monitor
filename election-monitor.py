@@ -24,62 +24,31 @@ exist.
 
 # Import libraries
 import requests
-from bs4 import BeautifulSoup
+# from bs4 import BeautifulSoup
 from datetime import datetime
 from pytz import timezone
 import os.path
 from apscheduler.schedulers.blocking import BlockingScheduler
-from apscheduler.schedulers.background import BackgroundScheduler
-
-
-
-# Set what web page to get
-# Future functionality should ask what page to get
-url = "http://example.com"
-
-
-# Set where to store the file/s
-# Directory must already exist
-save_here = 'C:/monitor/'
-# Future functionality should ask where to save to
-# Future functionality should also use unique web page title from url stored
-# to use as a folder name to group all the retrieved copies in a single directory
-
-
-# Set the retrieval frequency (in minutes) / how often 
-# to retrieve a copy of the site
-# Future functionality should ask the frequency
-frequency = 5.0
-
-
-
-# Set how long the program will run for.
-# Run the program this number of times / save this number of copies and then quit
-number_of_copies = 144
-
-
-# Initialize variable to keep track of how many times its run/how many copies saved
-copies_saved = 0
-
-
-# Establish what we'll call the saved version of the file
-# Future functionality should just grab the web page title and use that
-# with remediation for duplicates (so if we've already grabbed a page titled 
-# that, it'll add a version number or do some other remediation)
-filename = "election_result"
-
+# from apscheduler.schedulers.background import BackgroundScheduler
+import lxml.html
+import re
 
 
 
     
 # Get the web page
 def get_web_page(url_string):
-    file_obj = requests.get(url).text
+    file_obj = requests.get(url_string).text
     #print (file_obj)
     return file_obj
     # Future functionality should get the suffix of the retrieved web page (.html, .htm, .cfm, etc.)
     # and then keep that to append to the end of the saved copy.
 
+
+def get_url_title(url_string):
+    t = lxml.html.parse(url_string)
+    return t.find(".//title").text
+    
 
 # Function only used when called by create_path()
 def get_time_stamp():
@@ -99,7 +68,6 @@ def get_time_stamp():
 
 def create_path(filename_string, save_path):
     # Add the time stamp to the filename
-    #filename_w_time = filename + "-" + loc_dt.strftime(fmt)
     filename_w_time = filename_string + "-" + get_time_stamp()
     # Prepend the path
     return os.path.join(save_path, filename_w_time + ".html")     
@@ -108,14 +76,11 @@ def create_path(filename_string, save_path):
 
 
 # Function for storing the web site
-# Got some of this code from: https://stackoverflow.com/questions/8024248/telling-python-to-save-a-txt-file-to-a-certain-directory-on-windows-and-mac
+# Got some of this code from: https://stackoverflow.com/questions/12517451/automatically-creating-directories-with-file-output
 def store_copy(page_to_save, path_to_save_to):  
-    # Open a file object for writing
-    file_obj = open(path_to_save_to, "w")
-    # Write the retrieved web page to the file object
-    toFile = page_to_save
-    file_obj.write(toFile)
-    # Close the file object
+    os.makedirs(os.path.dirname(path_to_save_to), exist_ok=True)
+    with open(path_to_save_to, "w") as file_obj:
+        file_obj.write(page_to_save)  # this is what is being written to the file
     file_obj.close()
 
 
@@ -130,6 +95,70 @@ def repeat_tasks():
     # Need a more graceful way to stop the scheduler; this throws an error
     if copies_saved == number_of_copies:
         scheduler.shutdown()
+
+
+# Set what web page to get
+# Future functionality should ask what page to get
+url = "http://example.com"
+urls = "", "", "", "", "", ""
+# ---- Jennifer Cohn's elections to watch: 
+# Mike Levin vs. Diane Harkey for CA 49
+# Audrey4congress vs. Doug LaMalfa for CA 1
+# IronStache vs. Bryan Steill for WI01
+# Senator Bill Nelson vs. Gov. Rick Scott for FL Senator
+# Sharice Davids vs. Kevin Yoder for KS03
+# Lucy McBath vs Karen Handel for GA 06
+# Harley Rouda vs. Dana Rohrabacker for CA 48
+# Andrew Jantz vs. Devin Nunes for CA 22
+# Beto O'Rourke vs. Ted Cruz for TX senate
+# Phil Bredesen vs. Marsha Blackburn for TN senate
+# Danny O'Connor vs. Troy Balderson for OH12
+
+# Tony Evers vs. Scott Walker, WI governor
+# Andrew Gillum vs. Ron DeSantis for FL governor
+# Senator Laura Kelly vs. Kris Kobach for Kansas governor
+# Stacey Abrams vs. Brian Kemp for GA governor
+# Gretchen Whitmer vs. Bill Schuette for MI governor
+# Rich Cordray vs. Mike DeWine for OH governor
+# Kathleen Clyde vs. Frank LaRose for OH Sec of State
+
+
+
+
+# Set where to store the file/s, while ensuring directory/file name will 
+# be compatible with Windows
+save_here = 'C:/monitor/' + re.sub("[\.\t\,\:;\(\)\.]", "", get_url_title(url), 0, 0)
+# save_here = 'C:/monitor/' + get_url_title(url)
+# Future functionality should ask where to save to
+
+
+# Ensure file name will be compatible with Windows
+# save_here = re.sub("[\.\t\,\:;\(\)\.]", "", save_here, 0, 0)
+
+
+# Set the retrieval frequency (in minutes) / how often 
+# to retrieve a copy of the site
+# Often I bump this down to 0.3 for testing, but probably should be at 5.0 for election day, assuming 144 collection times (set below)
+frequency = 5.0
+# Future functionality should ask the frequency
+
+
+# Set how long the program will run for.
+# Run the program this number of times / save this number of copies and then quit
+number_of_copies = 144
+
+
+# Initialize variable to keep track of how many times its run/how many copies saved
+copies_saved = 0
+
+
+# Establish what we'll call the saved version of the file
+# Future functionality should just grab the web page title and use that
+# with remediation for duplicates (so if we've already grabbed a page titled 
+# that, it'll add a version number or do some other remediation)
+filename = "election_result"
+
+
 
 
 # Repeat the retrieval according to the frequency chosen above
@@ -158,50 +187,6 @@ scheduler.start()
 # Make the "Stop" time and "Stop after x times" options modifiable while the program is running.
 
 
-
-
-
-
-#### IDEAS - PROBABLY BAD ONES
-
-# Use cron with wget
-# http://www.scrounge.org/linux/cron.html 
-
-"""
-
-# Source: https://stackoverflow.com/questions/1367189/how-to-download-a-webpage-in-every-five-minutes
-# This is working but I don't know where it's saving.
-import time
-import os
-
-wget_command_string = "wget www.aarondietz.us"
-
-while True:
-    os.system(wget_command_string)
-    time.sleep(5*60)
-
-"""
-
-"""
-# This stuff is to schedule the grabbing of the site's content.
-
-# code snippet originally from: https://stackoverflow.com/questions/22715086/scheduling-python-script-to-run-every-hour-accurately
-# link to documentation: https://apscheduler.readthedocs.io/en/latest/ 
-from apscheduler.schedulers.blocking import BlockingScheduler
-
-def some_job():
-    print ("Job happens")
-
-scheduler = BlockingScheduler()
-scheduler.add_job(some_job, 'interval', minutes = 1)
-scheduler.start()
-
-
-
-
-# To shut it down:
-# scheduler.shutdown()
-"""
 
 
 
