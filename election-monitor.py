@@ -35,7 +35,19 @@ import re
 
 
 
-    
+
+# Function where everything we need to repeat goes.
+def repeat_tasks():
+    html = get_web_page(url)
+    save_path = create_path(filename, save_here)
+    store_copy(html, save_path)
+    global copies_saved
+    copies_saved += 1
+    # Need a more graceful way to stop the scheduler; this throws an error
+    if copies_saved == number_of_copies:
+        scheduler.shutdown()
+
+   
 # Get the web page
 def get_web_page(url_string):
     file_obj = requests.get(url_string).text
@@ -84,36 +96,31 @@ def store_copy(page_to_save, path_to_save_to):
     file_obj.close()
 
 
-
-# Function where everything we need to repeat goes.
-def repeat_tasks():
-    html = get_web_page(url)
-    save_path = create_path(filename, save_here)
-    store_copy(html, save_path)
-    global copies_saved
-    copies_saved += 1
-    # Need a more graceful way to stop the scheduler; this throws an error
-    if copies_saved == number_of_copies:
-        scheduler.shutdown()
-
-
 # Set what web page to get
 # Future functionality should ask what page to get
 url = "http://example.com"
-urls = "", "", "", "", "", ""
-# ---- Jennifer Cohn's elections to watch: 
-# Mike Levin vs. Diane Harkey for CA 49
-# Audrey4congress vs. Doug LaMalfa for CA 1
-# IronStache vs. Bryan Steill for WI01
-# Senator Bill Nelson vs. Gov. Rick Scott for FL Senator
-# Sharice Davids vs. Kevin Yoder for KS03
-# Lucy McBath vs Karen Handel for GA 06
-# Harley Rouda vs. Dana Rohrabacker for CA 48
-# Andrew Jantz vs. Devin Nunes for CA 22
-# Beto O'Rourke vs. Ted Cruz for TX senate
-# Phil Bredesen vs. Marsha Blackburn for TN senate
-# Danny O'Connor vs. Troy Balderson for OH12
-
+urls = [
+        # GA 06: Lucy McBath vs Karen Handel - Needs updating
+        "http://sos.ga.gov/index.php/elections/daily_turnout_reports_for_november_6_2018_election", 
+        # TN Senate: Phil Bredesen vs Marsha Blackburn -  Might work
+        "https://www.elections.tn.gov/county-results.php?OfficeByCounty=United%20States%20Senate", 
+        # CA 49: Mike Levin vs. Diane Harkey - Needs updating
+        "https://www.sos.ca.gov/elections/prior-elections/statewide-election-results/", 
+        # CA 48: Harley Rouda vs. Dana Rohrabacker
+        # CA 22: Andrew Jantz vs. Devin Nunes
+        # CA 1: Audrey4congress vs. Doug LaMalfa
+        # TX Senate: Beto O'Rourke vs. Ted Cruz - needs updating
+        "https://www.sos.state.tx.us/elections/historical/index.shtml", 
+        # OH 12: Danny O'Connor vs. Troy Balderson - needs updating
+        "https://www.sos.state.oh.us/elections/election-results-and-data/2018-official-elections-results/", 
+        # FL Senate: Bill Nelson vs. Gov. Rick Scott- needs updating
+        "https://dos.myflorida.com/elections/data-statistics/elections-data/election-results-archive/",
+        # WI 01: IronStache vs. Bryan Steill - needs updating
+        "https://elections.wi.gov/elections-voting/results",
+        # KS 03: Sharice Davids vs. Kevin Yoder - could work but would prefer a source link, this is local media
+        "https://www.kwch.com/elections/?configID=1339"
+        ]
+# ---- More elections we could add, non national, based on Jennifer Cohn's elections to watch: 
 # Tony Evers vs. Scott Walker, WI governor
 # Andrew Gillum vs. Ron DeSantis for FL governor
 # Senator Laura Kelly vs. Kris Kobach for Kansas governor
@@ -122,18 +129,14 @@ urls = "", "", "", "", "", ""
 # Rich Cordray vs. Mike DeWine for OH governor
 # Kathleen Clyde vs. Frank LaRose for OH Sec of State
 
+# Also would be good to add solid elections--ones not expected to be a surprise, either way.
 
 
 
 # Set where to store the file/s, while ensuring directory/file name will 
 # be compatible with Windows
 save_here = 'C:/monitor/' + re.sub("[\.\t\,\:;\(\)\.]", "", get_url_title(url), 0, 0)
-# save_here = 'C:/monitor/' + get_url_title(url)
 # Future functionality should ask where to save to
-
-
-# Ensure file name will be compatible with Windows
-# save_here = re.sub("[\.\t\,\:;\(\)\.]", "", save_here, 0, 0)
 
 
 # Set the retrieval frequency (in minutes) / how often 
@@ -153,7 +156,7 @@ copies_saved = 0
 
 
 # Establish what we'll call the saved version of the file
-# Future functionality should just grab the web page title and use that
+# Future functionality should just grab the web page title or other info and use that
 # with remediation for duplicates (so if we've already grabbed a page titled 
 # that, it'll add a version number or do some other remediation)
 filename = "election_result"
@@ -172,14 +175,13 @@ scheduler.start()
 
 
 ### TO DO LIST ###
+# Add functionality for getting more than one page
+
 # Add functionality for capturing various different URL suffixes/page types (html, pdf, etc.) and saving as such.
 
 # Add functionality for dialog box GUI (goal is to make it easy for non-coders to use)
 
 # Add functionality for building into an executable that can be run by non-coders
-
-# Add functionality for getting more than one page
-# Add functionality for each page to be saved in its own folder (for when it can handle more than one page)
 
 # Add a "Stop" button
 # Add a "Stop" time
