@@ -38,6 +38,23 @@ import re
 
 # Function where everything we need to repeat goes.
 def repeat_tasks():
+    for u, p in zip(urls, page_titles):
+        print(u, p)
+        html = get_web_page(u)
+        save_path = create_path(filename, save_here + p)
+        print(save_path)
+        store_copy(html, save_path)
+    global copies_saved
+    copies_saved += 1
+    # Need a more graceful way to stop the scheduler; this throws an error
+    if copies_saved == number_of_copies:
+        scheduler.shutdown()
+
+
+"""
+Old copy:
+    
+def repeat_tasks():
     html = get_web_page(url)
     save_path = create_path(filename, save_here)
     store_copy(html, save_path)
@@ -46,6 +63,8 @@ def repeat_tasks():
     # Need a more graceful way to stop the scheduler; this throws an error
     if copies_saved == number_of_copies:
         scheduler.shutdown()
+"""
+
 
    
 # Get the web page
@@ -59,7 +78,8 @@ def get_web_page(url_string):
 
 def get_url_title(url_string):
     t = lxml.html.parse(url_string)
-    return t.find(".//title").text
+    # return just the title up to 30 characters, then remove lead and trailing spaces
+    return t.find(".//title").text[:40].strip()
     
 
 # Function only used when called by create_path()
@@ -96,9 +116,16 @@ def store_copy(page_to_save, path_to_save_to):
     file_obj.close()
 
 
-# Set what web page to get
-# Future functionality should ask what page to get
+# Set what web pages to get
+# Future functionality should ask what page to get, save a modifiable list of URLs
 url = "http://example.com"
+
+# NEED FUNCTIONALITY TO HANDLE https AND OTHER NON-http PAGE REQUESTS
+urls = ["http://example.com", 
+        "http://sos.ga.gov/index.php/elections/daily_turnout_reports_for_november_6_2018_election",
+        "http://www.behindthename.com/random/"]
+
+"""
 urls = [
         # GA 06: Lucy McBath vs Karen Handel - Needs updating
         "http://sos.ga.gov/index.php/elections/daily_turnout_reports_for_november_6_2018_election", 
@@ -120,6 +147,7 @@ urls = [
         # KS 03: Sharice Davids vs. Kevin Yoder - could work but would prefer a source link, this is local media
         "https://www.kwch.com/elections/?configID=1339"
         ]
+"""
 # ---- More elections we could add, non national, based on Jennifer Cohn's elections to watch: 
 # Tony Evers vs. Scott Walker, WI governor
 # Andrew Gillum vs. Ron DeSantis for FL governor
@@ -132,17 +160,29 @@ urls = [
 # Also would be good to add solid elections--ones not expected to be a surprise, either way.
 
 
+# Initialize list for page titles, to be used as folder names to group downloaded results
+page_titles = []
+for x in urls:
+    page_titles.append(re.sub("[\.\t\,\:;\(\)\.]", "", get_url_title(x), 0, 0))
+    # print(get_url_title(x))
+# print (page_titles)
+
+# testing for other types of page requests
+# print(get_url_title("https://www.sos.ca.gov/elections/prior-elections/statewide-election-results/"))
+
+
 
 # Set where to store the file/s, while ensuring directory/file name will 
 # be compatible with Windows
-save_here = 'C:/monitor/' + re.sub("[\.\t\,\:;\(\)\.]", "", get_url_title(url), 0, 0)
+save_here = 'C:/monitor/' 
+# no longer needed: + re.sub("[\.\t\,\:;\(\)\.]", "", get_url_title(url), 0, 0)
 # Future functionality should ask where to save to
 
 
 # Set the retrieval frequency (in minutes) / how often 
 # to retrieve a copy of the site
 # Often I bump this down to 0.3 for testing, but probably should be at 5.0 for election day, assuming 144 collection times (set below)
-frequency = 5.0
+frequency = 1.0
 # Future functionality should ask the frequency
 
 
