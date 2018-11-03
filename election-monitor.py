@@ -23,17 +23,14 @@ exist.
 """
 
 # Import libraries
-import requests
 # from bs4 import BeautifulSoup
 from datetime import datetime
 from pytz import timezone
 import os.path
 from apscheduler.schedulers.blocking import BlockingScheduler
 # from apscheduler.schedulers.background import BackgroundScheduler
-import lxml.html
 import re
-
-
+from urllib.request import Request, urlopen
 
 
 # Function where everything we need to repeat goes.
@@ -51,36 +48,46 @@ def repeat_tasks():
         scheduler.shutdown()
 
 
-"""
-Old copy:
-    
-def repeat_tasks():
-    html = get_web_page(url)
-    save_path = create_path(filename, save_here)
-    store_copy(html, save_path)
-    global copies_saved
-    copies_saved += 1
-    # Need a more graceful way to stop the scheduler; this throws an error
-    if copies_saved == number_of_copies:
-        scheduler.shutdown()
-"""
-
 
    
 # Get the web page
 def get_web_page(url_string):
-    file_obj = requests.get(url_string).text
-    #print (file_obj)
-    return file_obj
+    req = Request(url_string, headers={'User-Agent': 'Mozilla/5.0'})
+    webpage = urlopen(req).read()
+    mystr = webpage.decode("utf8")
+    return mystr
+
     # Future functionality should get the suffix of the retrieved web page (.html, .htm, .cfm, etc.)
     # and then keep that to append to the end of the saved copy.
 
+"""
+old version:
+    fp = urllib.request.urlopen(url_string)
+    mybytes = fp.read()
+    mystr = mybytes.decode("utf8")
+    fp.close()
+    return mystr
+"""
+
+
+
+
 
 def get_url_title(url_string):
-    t = lxml.html.parse(url_string)
-    # return just the title up to 30 characters, then remove lead and trailing spaces
-    return t.find(".//title").text[:40].strip()
+    req = Request(url_string, headers={'User-Agent': 'Mozilla/5.0'})
+    webpage = urlopen(req).read()
+    title = str(webpage).split('<title>')[1].split('</title>')[0]
+    return title[:40].strip()
     
+"""
+    webpage = urllib.request.urlopen(url_string).read()
+    title = str(webpage).split('<title>')[1].split('</title>')[0]
+    return title[:40].strip()
+"""
+
+
+
+
 
 # Function only used when called by create_path()
 def get_time_stamp():
@@ -118,14 +125,6 @@ def store_copy(page_to_save, path_to_save_to):
 
 # Set what web pages to get
 # Future functionality should ask what page to get, save a modifiable list of URLs
-url = "http://example.com"
-
-# NEED FUNCTIONALITY TO HANDLE https AND OTHER NON-http PAGE REQUESTS
-urls = ["http://example.com", 
-        "http://sos.ga.gov/index.php/elections/daily_turnout_reports_for_november_6_2018_election",
-        "http://www.behindthename.com/random/"]
-
-"""
 urls = [
         # GA 06: Lucy McBath vs Karen Handel - Needs updating
         "http://sos.ga.gov/index.php/elections/daily_turnout_reports_for_november_6_2018_election", 
@@ -147,6 +146,12 @@ urls = [
         # KS 03: Sharice Davids vs. Kevin Yoder - could work but would prefer a source link, this is local media
         "https://www.kwch.com/elections/?configID=1339"
         ]
+
+
+
+"""
+["http://example.com", 
+        "http://www.behindthename.com/random/"]
 """
 # ---- More elections we could add, non national, based on Jennifer Cohn's elections to watch: 
 # Tony Evers vs. Scott Walker, WI governor
@@ -163,26 +168,23 @@ urls = [
 # Initialize list for page titles, to be used as folder names to group downloaded results
 page_titles = []
 for x in urls:
-    page_titles.append(re.sub("[\.\t\,\:;\(\)\.]", "", get_url_title(x), 0, 0))
-    # print(get_url_title(x))
-# print (page_titles)
+    page_titles.append(re.sub("[\.\t\,\:;\(\)\.\|]", "", get_url_title(x), 0, 0))
+    print(get_url_title(x))
 
-# testing for other types of page requests
-# print(get_url_title("https://www.sos.ca.gov/elections/prior-elections/statewide-election-results/"))
+
 
 
 
 # Set where to store the file/s, while ensuring directory/file name will 
 # be compatible with Windows
 save_here = 'C:/monitor/' 
-# no longer needed: + re.sub("[\.\t\,\:;\(\)\.]", "", get_url_title(url), 0, 0)
 # Future functionality should ask where to save to
 
 
 # Set the retrieval frequency (in minutes) / how often 
 # to retrieve a copy of the site
 # Often I bump this down to 0.3 for testing, but probably should be at 5.0 for election day, assuming 144 collection times (set below)
-frequency = 1.0
+frequency = 5.0
 # Future functionality should ask the frequency
 
 
@@ -215,9 +217,10 @@ scheduler.start()
 
 
 ### TO DO LIST ###
-# Add functionality for getting more than one page
+# Add more error handling to ensure we get the web page downloaded/copied
 
-# Add functionality for capturing various different URL suffixes/page types (html, pdf, etc.) and saving as such.
+# Add functionality for capturing even more different URL suffixes/page types (html, pdf, etc.) 
+# Add functionality for saving each file as its specific file type/suffix.
 
 # Add functionality for dialog box GUI (goal is to make it easy for non-coders to use)
 
@@ -228,15 +231,45 @@ scheduler.start()
 # Add a "Stop after x times" feature
 # Make the "Stop" time and "Stop after x times" options modifiable while the program is running.
 
+"""
+
+# Testing ground
+html = get_web_page("https://www.sos.state.oh.us/elections/election-results-and-data/2018-official-elections-results/")
+                     https://www.sos.state.oh.us/elections/election-results-and-data/2018-official-elections-results/
+print(html)
+save_path = create_path(filename, save_here + get_url_title("https://www.sos.state.oh.us/elections/election-results-and-data/2018-official-elections-results/"))
+print(save_path)
+store_copy(html, save_path)
 
 
 
 
+from urllib.request import Request, urlopen
+
+req = Request('https://www.sos.state.oh.us/elections/election-results-and-data/2018-official-elections-results/', headers={'User-Agent': 'Mozilla/5.0'})
+webpage = urlopen(req).read()
+print(webpage)
+
+
+
+"""
 
 
 
 
+"""
+Info for later, maybe
 
+info and geturl
+
+The response returned by urlopen (or the HTTPError instance) has two useful methods info() and geturl() and is defined in the module urllib.response..
+
+geturl - this returns the real URL of the page fetched. This is useful because urlopen (or the opener object used) may have followed a redirect. The URL of the page fetched may not be the same as the URL requested.
+
+info - this returns a dictionary-like object that describes the page fetched, particularly the headers sent by the server. It is currently an http.client.HTTPMessage instance.
+
+Typical headers include ‘Content-length’, ‘Content-type’, and so on. See the Quick Reference to HTTP Headers for a useful listing of HTTP headers with brief explanations of their meaning and use.
+"""
 
 
 
