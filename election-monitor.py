@@ -144,7 +144,31 @@ urls = [
         # WI 01: IronStache vs. Bryan Steill - needs updating
         "https://elections.wi.gov/elections-voting/results",
         # KS 03: Sharice Davids vs. Kevin Yoder - could work but would prefer a source link, this is local media
-        "https://www.kwch.com/elections/?configID=1339"
+        "https://www.kwch.com/elections/?configID=1339",
+        
+        # ALSO TRACKING THE FOLLOWING 'SURE THING'S':
+        # MS Senate: David Baria (D) vs. Roger F. Wicker (R)
+        "http://www.sos.ms.gov/Elections-Voting/Pages/2018-Elections-Results.aspx",   #start fixing how the program handles these links here
+        # UT Senate: Jenny Wilson vs. Mitt Romney 
+        "https://electionresults.utah.gov/elections/federal",
+        # WA Senate: Maria Cantwell vs. Susan Hutchinson 
+        "https://results.vote.wa.gov/results/current/Federal-All.html",
+        # NM Senate: Martin Heinrich vs. Mick Rich vs. Gary Johnson
+        "http://electionresults.sos.state.nm.us/resultsSW.aspx?type=FED&map=CTY",
+        # MI 4th: John Moolenaar (R) vs. Jerry Hilliard (D) 
+        "https://www.michigan.gov/sos/0,4670,7-127-1633_8722---,00.html",
+        # PA 9th: Dan Meuser (R) vs. Denny Wolff 
+        "https://www.electionreturns.pa.gov/General/CountyResults?countyName=Schuylkill&ElectionID=63&ElectionType=G&IsActive=1",
+        # NC 11th: Mark Meadows vs. Phillip G. Price vs. Clifton Ingram Jr.
+        "https://www.ncsbe.gov/election-results",
+        # OR 1st: Suzanne Bonamici vs. John Verbeek vs. Drew Layda
+        "https://sos.oregon.gov/elections/Pages/electionhistory.aspx",
+        # NY 26th: Brian Higgins (D) vs. Renee Zeno
+        "https://www.elections.ny.gov/2018ElectionResults.html",
+        # CT 3rd: Rosa L. DeLauro (D) vs. Angel Cadena
+        "https://portal.ct.gov/SOTS/Election-Services/Election-Results/Election-Results",
+        # last test
+        "http://example.com"
         ]
 
 
