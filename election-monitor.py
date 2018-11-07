@@ -35,58 +35,72 @@ from urllib.request import Request, urlopen
 import io
 
 
+
 # Set what web pages to get
 # Future functionality should ask what page to get, save a modifiable list of URLs
 urls = [
-        # GA 06: Lucy McBath vs Karen Handel - Needs updating
-        "http://sos.ga.gov/index.php/elections/daily_turnout_reports_for_november_6_2018_election", 
-        # TN Senate: Phil Bredesen vs Marsha Blackburn -  Might work
+        # LOOKS GOOD PRE-VOTING -  TN Senate: Phil Bredesen vs Marsha Blackburn -  Might work
         "https://www.elections.tn.gov/county-results.php?OfficeByCounty=United%20States%20Senate", 
-        # CA 49: Mike Levin vs. Diane Harkey - Needs updating
-        "https://www.sos.ca.gov/elections/prior-elections/statewide-election-results/", 
-        # CA 48: Harley Rouda vs. Dana Rohrabacker
-        # CA 22: Andrew Jantz vs. Devin Nunes
-        # CA 1: Audrey4congress vs. Doug LaMalfa
-        # TX Senate: Beto O'Rourke vs. Ted Cruz - needs updating
-        "https://www.sos.state.tx.us/elections/historical/index.shtml", 
-        # OH 12: Danny O'Connor vs. Troy Balderson - needs updating
-        "https://www.sos.state.oh.us/elections/election-results-and-data/2018-official-elections-results/", 
-        # FL Senate: Bill Nelson vs. Gov. Rick Scott- needs updating
-        "https://dos.myflorida.com/elections/data-statistics/elections-data/election-results-archive/",
-        # WI 01: IronStache vs. Bryan Steill - needs updating
-        "https://elections.wi.gov/elections-voting/results",
-        # KS 03: Sharice Davids vs. Kevin Yoder - could work but would prefer a source link, this is local media
+        # LOOKS GOOD PRE-VOTING -  TX Senate: Beto O'Rourke vs. Ted Cruz - needs updating
+        "https://enrpages.sos.state.tx.us/public/nov06_331_race0.htm", 
+        # LOOKS GOOD PRE-VOTING -  KS 03: Sharice Davids vs. Kevin Yoder - could work but would prefer a source link, this is local media
         "https://www.kwch.com/elections/?configID=1339",
+        # LOOKS GOOD PRE-VOTING -  UT Senate: Jenny Wilson vs. Mitt Romney 
+        "https://electionresults.utah.gov/elections/federal",
+        # LOOKS GOOD PRE-VOTING -  MI 4th: John Moolenaar (R) vs. Jerry Hilliard (D) 
+        "https://mielections.us/election/results/2018GEN_CENR.html",
+        # LOOKS GOOD PRE-VOTING - OR 1st: Suzanne Bonamici vs. John Verbeek vs. Drew Layda
+        "http://results.oregonvotes.gov/resultsSW.aspx?type=FED&map=CTY",
+        # LOOKS GOOD PRE-VOTING - NM Senate: Martin Heinrich vs. Mick Rich vs. Gary Johnson
+        "http://electionresults.sos.state.nm.us/resultsSW.aspx?type=FED&map=CTY",
+        # LOOKS GOOD PRE-VOTING - WA Senate: Maria Cantwell vs. Susan Hutchinson 
+        "https://results.vote.wa.gov/results/current/US-Senator_ByCounty.html",
+
+        # FL Senate: Bill Nelson vs. Gov. Rick Scott- needs updating after 5pm
+        "https://floridaelectionwatch.gov/ContestResultsByCounty/120000",
+        # WI 01: IronStache vs. Bryan Steill - Unfortunately they post unofficial results by county. Sheeshers. Waukesha county
+        "https://electionresults.waukeshacounty.gov/contests.aspx?contest=5",
+        # WI 01: IronStache vs. Bryan Steill - Unfortunately they post unofficial results by county. Sheeshers. Milwaukee county
+   #     "https://county.milwaukee.gov/files/county/county-clerk/Election-Commission/ElectionResultsCopy-1/2018Copy-1/11-2-18FallGeneralElection-WardbyWard-UnofficialResults.txt"
+        # CA 49: Mike Levin vs. Diane Harkey - Needs updating at 8pm
+        "https://vote.sos.ca.gov/returns/us-rep/district/49",
+        # CA 48: Harley Rouda vs. Dana Rohrabacker
+        "https://vote.sos.ca.gov/returns/us-rep/district/48",
+        # CA 22: Andrew Jantz vs. Devin Nunes
+        "https://vote.sos.ca.gov/returns/us-rep/district/22",
+        # CA 1: Audrey4congress vs. Doug LaMalfa
+        "https://vote.sos.ca.gov/returns/us-rep/district/1"
+        # GA Governor Abrams    <--- throws list index out of range error
+  #      "https://results.enr.clarityelections.com/GA/Colquitt/91675/216647/reports/detailxml.zip"
+        # GA 06: Lucy McBath vs Karen Handel - Coming in blank
+  #      "https://results.enr.clarityelections.com/GA/91639/Web02-state.216038/#/c/C_2"
+
         
         # ALSO TRACKING THE FOLLOWING 'SURE THING'S':
-        # UT Senate: Jenny Wilson vs. Mitt Romney 
-        "https://electionresults.utah.gov/elections/federal",
-        # MI 4th: John Moolenaar (R) vs. Jerry Hilliard (D) 
-        "https://www.michigan.gov/sos/0,4670,7-127-1633_8722---,00.html",
-        # PA 9th: Dan Meuser (R) vs. Denny Wolff 
-        "https://www.electionreturns.pa.gov/General/CountyResults?countyName=Schuylkill&ElectionID=63&ElectionType=G&IsActive=1",
-        # NC 11th: Mark Meadows vs. Phillip G. Price vs. Clifton Ingram Jr.
-        "https://www.ncsbe.gov/election-results",
-        # NY 26th: Brian Higgins (D) vs. Renee Zeno
-        "https://www.elections.ny.gov/2018ElectionResults.html",
+
+        # NY 26th: Brian Higgins (D) vs. Renee Zeno       Causing error, but otherwise looks ready
+  #      "http://www.elections.ny.gov/ENR/NYSENRAccessible.html",
         # CT 3rd: Rosa L. DeLauro (D) vs. Angel Cadena
-        "https://portal.ct.gov/SOTS/Election-Services/Election-Results/Election-Results",
-        # OR 1st: Suzanne Bonamici vs. John Verbeek vs. Drew Layda
-        "https://sos.oregon.gov/elections/Pages/electionhistory.aspx",
-        # NM Senate: Martin Heinrich vs. Mick Rich vs. Gary Johnson
-        "http://electionresults.sos.state.nm.us/resultsSW.aspx?type=FED&map=CTY",
+   #     "https://ctemspublic.pcctg.net/#/home"
+            # "https://portal.ct.gov/SOTS/Election-Services/Election-Results/Election-Results",
         # MS Senate: David Baria (D) vs. Roger F. Wicker (R)
-        "http://www.sos.ms.gov/Elections-Voting/Pages/2018-Elections-Results.aspx",   
-        # WA Senate: Maria Cantwell vs. Susan Hutchinson 
-        "https://results.vote.wa.gov/results/current/Federal-All.html",
+   #     "http://www.sos.ms.gov/Elections-Voting/Pages/2018-Elections-Results.aspx",   
+        
+        # Adding NYTimes House Tracker    <--- throwing list index out of range error
+  #      "https://www.nytimes.com/interactive/2018/11/06/us/elections/results-house-elections.html"
+        
+        # Adding NYTimes Senate Tracker     <--- throwing list index out of range error
+  #      "https://www.nytimes.com/interactive/2018/11/06/us/elections/results-senate-elections.html",
+  
+        # OH 12: Danny O'Connor vs. Troy Balderson - total dyanmic page, bleh.
+  #      "https://www.sos.state.oh.us/"  
+        # PA 9th: Dan Meuser (R) vs. Denny Wolff  ----dynamically generated page: https://stackoverflow.com/questions/8960288/get-page-generated-with-javascript-in-python
+  #      "https://www.electionreturns.pa.gov/General/CountyBreakDownResults?officeId=2&districtId=1&ElectionID=63&ElectionType=G&IsActive=1",
+        # NC 11th: Mark Meadows vs. Phillip G. Price vs. Clifton Ingram Jr.    <---- d
+   #     "https://er.ncsbe.gov/contest_details.html?election_dt=11/06/2018&county_id=0&contest_id=1185",
         ]
 
 
-
-"""
-["http://example.com", 
-        "http://www.behindthename.com/random/"]
-"""
 # ---- More elections we could add, non national, based on Jennifer Cohn's elections to watch: 
 # Tony Evers vs. Scott Walker, WI governor
 # Andrew Gillum vs. Ron DeSantis for FL governor
@@ -111,13 +125,13 @@ save_here = 'C:/monitor/'
 # Set the retrieval frequency (in minutes) / how often 
 # to retrieve a copy of the site
 # Often I bump this down to 0.3 for testing, but probably should be at 5.0 for election day, assuming 144 collection times (set below)
-frequency = 1.0
+frequency = 5.0
 # Future functionality should ask the frequency
 
 
 # Set how long the program will run for.
 # Run the program this number of times / save this number of copies and then quit
-number_of_copies = 144
+number_of_copies = 100
 
 
 # Initialize variable to keep track of how many times its run/how many copies saved
@@ -245,6 +259,9 @@ for x in urls:
     print(page_titles[-1])
 
 
+
+# Run the regular tasks once, before we start the timed runs.
+repeat_tasks()
 
 
 # Repeat the retrieval according to the frequency chosen above
